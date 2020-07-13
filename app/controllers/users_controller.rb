@@ -1,5 +1,5 @@
 class UsersController < Clearance::UsersController
-  include CastleTrack
+  include CastleTracking
 
   def new
     redirect_to sign_up_path
@@ -10,14 +10,14 @@ class UsersController < Clearance::UsersController
     if @user.save
       Mailer.delay.email_confirmation(@user)
       flash[:notice] = t(".email_sent")
-      track_castle_event(Castle::RegistrationSucceeded, @user)
+      track_castle_event(Castle::Events::REGISTRATION_SUCCEEDED, @user)
       redirect_back_or url_after_create
     else
-      track_castle_event(Castle::RegistrationFailed, @user)
+      track_castle_event(Castle::Events::REGISTRATION_FAILED, @user)
       render template: "users/new"
     end
   rescue ActionController::ParameterMissing => e
-    track_castle_event(Castle::RegistrationFailed, nil)
+    track_castle_event(Castle::Events::REGISTRATION_FAILED, nil)
     render plain: "Request is missing param '#{e.param}'", status: :bad_request
   end
 

@@ -1,13 +1,13 @@
 class PasswordsController < Clearance::PasswordsController
-  include CastleTrack
+  include CastleTracking
 
   before_action :validate_confirmation_token, only: %i[edit mfa_edit]
 
   def create
     super
-    track_castle_event(Castle::ProfileUpdateSucceeded, @user)
+    track_castle_event(Castle::Events::PROFILE_UPDATE_SUCCEEDED, @user)
   rescue ActionController::ParameterMissing => e
-    track_castle_event(Castle::ProfileUpdateFailed, @user)
+    track_castle_event(Castle::Events::PROFILE_UPDATE_FAILED, @user)
     render plain: "Request is missing param '#{e.param}'", status: :bad_request
   end
 
@@ -26,24 +26,24 @@ class PasswordsController < Clearance::PasswordsController
       @user.reset_api_key! if reset_params[:reset_api_key] == "true"
       sign_in @user
       redirect_to url_after_update
-      track_castle_event(Castle::ProfileUpdateSucceeded, @user)
+      track_castle_event(Castle::Events::PROFILE_UPDATE_SUCCEEDED, @user)
       session[:password_reset_token] = nil
     else
       flash_failure_after_update
-      track_castle_event(Castle::ProfileUpdateFailed, @user)
+      track_castle_event(Castle::Events::PROFILE_UPDATE_FAILED, @user)
       render template: "passwords/edit"
     end
   rescue ActionController::ParameterMissing => e
-    track_castle_event(Castle::ProfileUpdateFailed, @user)
+    track_castle_event(Castle::Events::PROFILE_UPDATE_FAILED, @user)
     render plain: "Request is missing param '#{e.param}'", status: :bad_request
   end
 
   def mfa_edit
     if @user.mfa_enabled? && @user.otp_verified?(params[:otp])
-      track_castle_event(Castle::ProfileUpdateSucceeded, @user)
+      track_castle_event(Castle::Events::PROFILE_UPDATE_SUCCEEDED, @user)
       render template: "passwords/edit"
     else
-      track_castle_event(Castle::ProfileUpdateFailed, @user)
+      track_castle_event(Castle::Events::PROFILE_UPDATE_FAILED, @user)
       flash.now.alert = t("multifactor_auths.incorrect_otp")
       render template: "passwords/otp_prompt", status: :unauthorized
     end

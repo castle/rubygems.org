@@ -96,7 +96,10 @@ class ProfilesControllerTest < ActionController::TestCase
         end
 
         should "enqueue profile update succeeded job" do
-          assert_equal Set[Castle::ProfileUpdateSucceeded], queued_job_classes
+          assert_equal(
+            Set[Castle::Events::PROFILE_UPDATE_SUCCEEDED],
+            queued_castle_track_event_jobs
+          )
         end
       end
 
@@ -119,7 +122,10 @@ class ProfilesControllerTest < ActionController::TestCase
         end
 
         should "enqueue profile update succeeded job" do
-          assert_equal Set[Castle::ProfileUpdateSucceeded], queued_job_classes
+          assert_equal(
+            Set[Castle::Events::PROFILE_UPDATE_SUCCEEDED],
+            queued_castle_track_event_jobs
+          )
         end
       end
 
@@ -137,7 +143,7 @@ class ProfilesControllerTest < ActionController::TestCase
         end
 
         should "enqueue profile update failed job" do
-          assert_equal Set[Castle::ProfileUpdateFailed], queued_job_classes
+          assert_equal Set[Castle::Events::PROFILE_UPDATE_FAILED], queued_castle_track_event_jobs
         end
       end
 
@@ -157,7 +163,10 @@ class ProfilesControllerTest < ActionController::TestCase
         end
 
         should "enqueue profile update succeeded job" do
-          assert_equal Set[Castle::ProfileUpdateSucceeded], queued_job_classes
+          assert_equal(
+            Set[Castle::Events::PROFILE_UPDATE_SUCCEEDED],
+            queued_castle_track_event_jobs
+          )
         end
       end
 
@@ -173,7 +182,7 @@ class ProfilesControllerTest < ActionController::TestCase
         end
 
         should "enqueue profile update failed job" do
-          assert_equal Set[Castle::ProfileUpdateFailed], queued_job_classes
+          assert_equal Set[Castle::Events::PROFILE_UPDATE_FAILED], queued_castle_track_event_jobs
         end
       end
 
@@ -189,7 +198,7 @@ class ProfilesControllerTest < ActionController::TestCase
         end
 
         should "enqueue profile update failed job" do
-          assert_equal Set[Castle::ProfileUpdateFailed], queued_job_classes
+          assert_equal Set[Castle::Events::PROFILE_UPDATE_FAILED], queued_castle_track_event_jobs
         end
       end
     end
@@ -198,11 +207,13 @@ class ProfilesControllerTest < ActionController::TestCase
       context "correct password" do
         setup do
           delete :destroy, params: { user: { password: @user.password } }
-          @expected_job_classes = Set[Castle::ProfileUpdateSucceeded, DeleteUser]
         end
 
-        should "enqueue delete user and profile update succeeded jobs" do
-          assert_equal @expected_job_classes, queued_job_classes
+        should "enqueue profile update succeeded job" do
+          assert_equal(
+            Set[Castle::Events::PROFILE_UPDATE_SUCCEEDED],
+            queued_castle_track_event_jobs
+          )
         end
 
         context "redirect path and flash" do
@@ -218,7 +229,7 @@ class ProfilesControllerTest < ActionController::TestCase
         end
 
         should "enqueue profile update failed job and not delete user job" do
-          assert_equal Set[Castle::ProfileUpdateFailed], queued_job_classes
+          assert_equal Set[Castle::Events::PROFILE_UPDATE_FAILED], queued_castle_track_event_jobs
         end
 
         context "redirect path and flash" do

@@ -19,10 +19,9 @@ class UsersControllerTest < ActionController::TestCase
             email: "foo@bar.com", password: PasswordHelpers::SECURE_TEST_PASSWORD
           }
         }
-        expected_job_classes = Set[Castle::RegistrationSucceeded, Delayed::PerformableMailer]
 
         assert User.find_by(email: "foo@bar.com")
-        assert_equal expected_job_classes, queued_job_classes
+        assert_equal Set[Castle::Events::REGISTRATION_SUCCEEDED], queued_castle_track_event_jobs
       end
     end
 
@@ -36,7 +35,7 @@ class UsersControllerTest < ActionController::TestCase
         }
 
         assert_equal User.where(email: "foo@bar.com").count, 1
-        assert_equal Set[Castle::RegistrationFailed], queued_job_classes
+        assert_equal Set[Castle::Events::REGISTRATION_FAILED], queued_castle_track_event_jobs
       end
     end
 
@@ -46,7 +45,7 @@ class UsersControllerTest < ActionController::TestCase
 
         assert_response :bad_request
         assert page.has_content?("Request is missing param 'user'")
-        assert_equal Set[Castle::RegistrationFailed], queued_job_classes
+        assert_equal Set[Castle::Events::REGISTRATION_FAILED], queued_castle_track_event_jobs
       end
     end
 
@@ -59,10 +58,9 @@ class UsersControllerTest < ActionController::TestCase
             handle: "foo"
           }
         }
-        expected_job_classes = Set[Castle::RegistrationSucceeded, Delayed::PerformableMailer]
 
         assert_equal "foo", User.where(email: "foo@bar.com").pluck(:handle).first
-        assert_equal expected_job_classes, queued_job_classes
+        assert_equal Set[Castle::Events::REGISTRATION_SUCCEEDED], queued_castle_track_event_jobs
       end
 
       should "create a user but dont assign not valid parameters" do

@@ -23,7 +23,7 @@ class SessionsControllerTest < ActionController::TestCase
       end
 
       should "enqueue challenge requested job" do
-        assert_equal Set[Castle::ChallengeRequested], queued_job_classes
+        assert_equal Set[Castle::Events::CHALLENGE_REQUESTED], queued_castle_track_event_jobs
       end
     end
 
@@ -32,7 +32,6 @@ class SessionsControllerTest < ActionController::TestCase
         setup do
           @controller.session[:mfa_user] = @user.handle
           post :mfa_create, params: { otp: ROTP::TOTP.new(@user.mfa_seed).now }
-          @expected_job_classes = Set[Castle::ChallengeSucceeded, Castle::LoginSucceeded]
         end
 
         should respond_with :redirect
@@ -46,7 +45,10 @@ class SessionsControllerTest < ActionController::TestCase
         end
 
         should "enqueue challenge succeeded and login succeeded jobs" do
-          assert_equal @expected_job_classes, queued_job_classes
+          assert_equal(
+            Set[Castle::Events::CHALLENGE_SUCCEEDED, Castle::Events::LOGIN_SUCCEEDED],
+            queued_castle_track_event_jobs
+          )
         end
       end
 
@@ -54,7 +56,6 @@ class SessionsControllerTest < ActionController::TestCase
         setup do
           @controller.session[:mfa_user] = @user.handle
           post :mfa_create, params: { otp: @user.mfa_recovery_codes.first }
-          @expected_job_classes = Set[Castle::ChallengeSucceeded, Castle::LoginSucceeded]
         end
 
         should respond_with :redirect
@@ -68,7 +69,10 @@ class SessionsControllerTest < ActionController::TestCase
         end
 
         should "enqueue challenge succeeded and login succeeded jobs" do
-          assert_equal @expected_job_classes, queued_job_classes
+          assert_equal(
+            Set[Castle::Events::CHALLENGE_SUCCEEDED, Castle::Events::LOGIN_SUCCEEDED],
+            queued_castle_track_event_jobs
+          )
         end
       end
 
@@ -76,7 +80,6 @@ class SessionsControllerTest < ActionController::TestCase
         setup do
           wrong_otp = (ROTP::TOTP.new(@user.mfa_seed).now.to_i.succ % 1_000_000).to_s
           post :mfa_create, params: { otp: wrong_otp }
-          @expected_job_classes = Set[Castle::ChallengeFailed, Castle::LoginFailed]
         end
 
         should set_flash.now[:notice]
@@ -95,7 +98,10 @@ class SessionsControllerTest < ActionController::TestCase
         end
 
         should "enqueue challenge failed and login failed jobs" do
-          assert_equal @expected_job_classes, queued_job_classes
+          assert_equal(
+            Set[Castle::Events::CHALLENGE_FAILED, Castle::Events::LOGIN_FAILED],
+            queued_castle_track_event_jobs
+          )
         end
       end
     end
@@ -117,7 +123,7 @@ class SessionsControllerTest < ActionController::TestCase
       end
 
       should "enqueue login succeeded job" do
-        assert_equal Set[Castle::LoginSucceeded], queued_job_classes
+        assert_equal Set[Castle::Events::LOGIN_SUCCEEDED], queued_castle_track_event_jobs
       end
     end
 
@@ -139,7 +145,7 @@ class SessionsControllerTest < ActionController::TestCase
       end
 
       should "enqueue login failed job" do
-        assert_equal Set[Castle::LoginFailed], queued_job_classes
+        assert_equal Set[Castle::Events::LOGIN_FAILED], queued_castle_track_event_jobs
       end
     end
 
@@ -154,7 +160,7 @@ class SessionsControllerTest < ActionController::TestCase
       end
 
       should "enqueue login failed job" do
-        assert_equal Set[Castle::LoginFailed], queued_job_classes
+        assert_equal Set[Castle::Events::LOGIN_FAILED], queued_castle_track_event_jobs
       end
     end
   end
@@ -172,7 +178,7 @@ class SessionsControllerTest < ActionController::TestCase
     end
 
     should "enqueue logout succeeded job" do
-      assert_equal Set[Castle::LogoutSucceeded], queued_job_classes
+      assert_equal Set[Castle::Events::LOGOUT_SUCCEEDED], queued_castle_track_event_jobs
     end
   end
 end

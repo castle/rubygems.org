@@ -1,26 +1,27 @@
 module Castle
   class TrackEvent
+    attr_reader :castle_event
     ALLOWED_TRAITS = %w[
       email
       created_at
       updated_at
-    ]
-    def initialize(user, context)
+    ].freeze
+
+    def initialize(user, context, castle_event)
       @user = user
       @context = context
+      @castle_event = castle_event
     end
 
-    def track(event_name)
-      ::Castle::Client
-        .new(@context)
-        .track(track_params(event_name))
+    def perform
+      Client.new(@context).track(track_params)
     end
 
     private
 
-    def track_params(event_name)
+    def track_params
       {
-        event: event_name,
+        event: @castle_event,
         user_id: user_id,
         user_traits: user_traits
       }
@@ -29,8 +30,8 @@ module Castle
     def user_traits
       return {} if @user.nil?
       ALLOWED_TRAITS.each_with_object({}) do |trait, traits|
-        if trait == 'created_at'
-          traits['registered_at'] = @user.attributes[trait]
+        if trait == "created_at"
+          traits["registered_at"] = @user.attributes[trait]
         else
           traits[trait] = @user.attributes[trait]
         end

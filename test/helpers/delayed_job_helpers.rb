@@ -1,9 +1,10 @@
 module DelayedJobHelpers
-  def queued_job_classes
+  def queued_castle_track_event_jobs
     Delayed::Job
       .all
-      .pluck(:handler)
-      .map { |handler| YAML.load(handler).class }
+      .map(&:payload_object)
+      .select { |payload| payload.class == Castle::TrackEvent }
+      .map(&:castle_event)
       .to_set
   end
 end
