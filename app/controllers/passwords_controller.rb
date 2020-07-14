@@ -33,9 +33,6 @@ class PasswordsController < Clearance::PasswordsController
       track_castle_event(Castle::Events::PROFILE_UPDATE_FAILED, @user)
       render template: "passwords/edit"
     end
-  rescue ActionController::ParameterMissing => e
-    track_castle_event(Castle::Events::PROFILE_UPDATE_FAILED, @user)
-    render plain: "Request is missing param '#{e.param}'", status: :bad_request
   end
 
   def mfa_edit

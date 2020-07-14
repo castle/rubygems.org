@@ -1,4 +1,5 @@
 module Castle
+  # Class for tracking events to Castle /track endpoint
   class TrackEvent
     attr_reader :castle_event
     ALLOWED_TRAITS = %w[
