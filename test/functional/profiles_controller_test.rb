@@ -216,6 +216,13 @@ class ProfilesControllerTest < ActionController::TestCase
           )
         end
 
+        should "enqueue delete user job" do
+          assert_equal(
+            Set[Castle::TrackEvent, DeleteUser],
+            all_queued_job_classes
+          )
+        end
+
         context "redirect path and flash" do
           should redirect_to("the homepage") { root_url }
           should set_flash.to("Your account deletion request has been enqueued."\
@@ -228,8 +235,12 @@ class ProfilesControllerTest < ActionController::TestCase
           post :destroy, params: { user: { password: "youshallnotpass" } }
         end
 
-        should "enqueue profile update failed job and not delete user job" do
+        should "enqueue profile update failed job" do
           assert_equal Set[Castle::Events::PROFILE_UPDATE_FAILED], queued_castle_track_event_jobs
+        end
+
+        should "not enqueue delete user job" do
+          assert_equal(Set[Castle::TrackEvent], all_queued_job_classes)
         end
 
         context "redirect path and flash" do
