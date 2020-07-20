@@ -1,0 +1,7 @@
+<script type="text/javascript" src='/assets/castle.js/dist/c.source.js'></script>
+<script type="text/javascript">
+  _castle('setAppId', <%= Rails.application.secrets.castle_app_id %>);
+  <% if current_user %>
+    _castle('identify', <%= current_user.id %>);
+  <% end %>
+</script>

@@ -16,9 +16,6 @@ class UsersController < Clearance::UsersController
       track_castle_event(Castle::Events::REGISTRATION_FAILED, @user)
       render template: "users/new"
     end
-  rescue ActionController::ParameterMissing => e
-    track_castle_event(Castle::Events::REGISTRATION_FAILED, nil)
-    render plain: "Request is missing param '#{e.param}'", status: :bad_request
   end
 
   private

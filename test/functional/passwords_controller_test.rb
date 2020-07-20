@@ -9,7 +9,6 @@ class PasswordsControllerTest < ActionController::TestCase
         post :create
         assert_response :bad_request
         assert page.has_content?("Request is missing param 'password'")
-        assert_equal Set[Castle::Events::PROFILE_UPDATE_FAILED], queued_castle_track_event_jobs
       end
     end
 

@@ -45,7 +45,6 @@ class UsersControllerTest < ActionController::TestCase
 
         assert_response :bad_request
         assert page.has_content?("Request is missing param 'user'")
-        assert_equal Set[Castle::Events::REGISTRATION_FAILED], queued_castle_track_event_jobs
       end
     end
 

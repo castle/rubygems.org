@@ -6,9 +6,6 @@ class PasswordsController < Clearance::PasswordsController
   def create
     super
     track_castle_event(Castle::Events::PROFILE_UPDATE_SUCCEEDED, @user)
-  rescue ActionController::ParameterMissing => e
-    track_castle_event(Castle::Events::PROFILE_UPDATE_FAILED, @user)
-    render plain: "Request is missing param '#{e.param}'", status: :bad_request
   end
 
   def edit
